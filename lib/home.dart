@@ -15,13 +15,16 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-enum Direction { UP, DOWN }
+enum Direction { UP, DOWN, LEFT, RIGHT }
 
 class _HomePageState extends State<HomePage> {
   // -----Step03---Let's add motion to the ball, create var for it
   double ballX = 0;
   double ballY = 0;
-  var ballDirection = Direction.DOWN;
+  double ballXIncrements = 0.009;
+  double ballYIncrements = 0.009;
+  var ballYDirection = Direction.DOWN;
+  var ballXDirection = Direction.LEFT;
 
 // player variables
   double playerX = -0.2;
@@ -68,7 +71,7 @@ class _HomePageState extends State<HomePage> {
         brickBroken == false) {
       setState(() {
         brickBroken = true;
-        ballDirection = Direction.DOWN;
+        ballYDirection = Direction.DOWN;
       });
     }
   }
@@ -85,23 +88,39 @@ class _HomePageState extends State<HomePage> {
 // update direction
   void updateDirection() {
     setState(() {
+      // goes up when hit the player
       if (ballY >= 0.9 && ballX >= playerX && ballX <= playerX + playerWidth) {
-        ballDirection = Direction.UP;
+        ballYDirection = Direction.UP;
+        // goes down when hit the top of the screen
       } else if (ballY <= -1) {
-        ballDirection = Direction.DOWN;
+        ballYDirection = Direction.DOWN;
       }
+      // goes left when hit right wall
+      if (ballX >= 1) {
+        ballXDirection = Direction.LEFT;
+      } else if (ballX <= -1) {
+        ballXDirection = Direction.RIGHT;
+      }
+
+      // goes right when hit left wall
     });
   }
 
 // Move Ball
   void moveBall() {
     setState(() {
-      if (ballDirection == Direction.DOWN) {
-        //
-        ballY += 0.01;
-      } else if (ballDirection == Direction.UP) {
-        //
-        ballY -= 0.01;
+      // move horizantally
+      if (ballXDirection == Direction.LEFT) {
+        ballX -= ballXIncrements;
+      } else if (ballXDirection == Direction.RIGHT) {
+        ballX += ballXIncrements;
+      }
+
+      // move vertivally
+      if (ballYDirection == Direction.DOWN) {
+        ballY += ballYIncrements;
+      } else if (ballYDirection == Direction.UP) {
+        ballY -= ballYIncrements;
       }
     });
   }
@@ -113,7 +132,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       // Allow moving left if the next move will not cause the player to skid off the screen
       if (!(playerX - 0.2 <= -1)) {
-        playerX -= 0.3;
+        playerX -= 0.4;
       }
     });
   }
@@ -121,8 +140,8 @@ class _HomePageState extends State<HomePage> {
 // Move Right
   void moveRight() {
     setState(() {
-      if (!(playerX + 0.32 >= 1)) {
-        playerX += 0.3;
+      if (!(playerX + 0.4 >= 1)) {
+        playerX += 0.4;
       }
     });
   }
