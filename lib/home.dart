@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:brick_breaker/ball.dart';
+import 'package:brick_breaker/brick.dart';
 import 'package:brick_breaker/cover_screen.dart';
+import 'package:brick_breaker/gamer_over_screen.dart';
 import 'package:brick_breaker/player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,9 +29,16 @@ class _HomePageState extends State<HomePage> {
 
 // Game Settings
   bool hasGameStarted = false;
+  bool isGameOver = false;
+
+// Brick variables
+  double brickX = 0;
+  double brickY = -0.9;
+  double brickWidth = 0.4;
+  double brickHeight = 0.05;
+  bool brickBroken = false;
 
   // Start game function on tap
-
   void startGame() {
     hasGameStarted = true;
     Timer.periodic(const Duration(milliseconds: 10), (timer) {
@@ -38,15 +47,47 @@ class _HomePageState extends State<HomePage> {
 
       // move ball
       moveBall();
+
+      // check if the game is over
+
+      if (isPlayerDead()) {
+        timer.cancel();
+        isGameOver = true;
+      }
+
+      // if brick is broken
+      checkForBrokenBrick();
     });
+  }
+
+  void checkForBrokenBrick() {
+    // check for when ball hits the bottom of bricks
+    if (ballX >= brickX &&
+        ballX <= brickX + brickWidth &&
+        ballY <= brickY + brickHeight &&
+        brickBroken == false) {
+      setState(() {
+        brickBroken = true;
+        ballDirection = Direction.DOWN;
+      });
+    }
+  }
+
+// Plyer dead
+  bool isPlayerDead() {
+    // check if the ball move out of the screen
+    if (ballY >= 1) {
+      return true;
+    }
+    return false;
   }
 
 // update direction
   void updateDirection() {
     setState(() {
-      if (ballY >= 0.9) {
+      if (ballY >= 0.9 && ballX >= playerX && ballX <= playerX + playerWidth) {
         ballDirection = Direction.UP;
-      } else if (ballY <= -0.9) {
+      } else if (ballY <= -1) {
         ballDirection = Direction.DOWN;
       }
     });
@@ -85,7 +126,6 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
-  // 10:30 sec----resume
 
   @override
   Widget build(BuildContext context) {
@@ -101,12 +141,14 @@ class _HomePageState extends State<HomePage> {
       child: GestureDetector(
         onTap: startGame,
         child: Scaffold(
-          backgroundColor: Colors.deepOrange,
+          backgroundColor: const Color.fromARGB(255, 246, 149, 120),
           body: Center(
             child: Stack(
               children: [
                 // Add tap to play text
                 CoverScreen(hasGameStarted: hasGameStarted),
+                // Game Over Screen
+                GamerOverScreen(isGameOver: isGameOver),
                 // Creating a ball
                 BallScreen(
                   ballX: ballX,
@@ -117,6 +159,15 @@ class _HomePageState extends State<HomePage> {
                   playerX: playerX,
                   playerWidth: playerWidth,
                 ),
+
+                // Bricks
+                MyBrick(
+                  brickBroken: brickBroken,
+                  brickHeight: brickHeight,
+                  brickWidth: brickWidth,
+                  brickX: brickX,
+                  brickY: brickY,
+                )
               ],
             ),
           ),
