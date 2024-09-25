@@ -16,7 +16,7 @@ class MyPlayer extends StatelessWidget {
           height: 15.0,
           width: MediaQuery.of(context).size.width * playerWidth / 2,
           decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 234, 4, 4),
+            color: Color.fromARGB(255, 107, 63, 34),
           ),
         ),
       ),
